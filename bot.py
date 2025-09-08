@@ -217,6 +217,14 @@ async def update(ctx):
         await ctx.send("Restarting!")
         os.system(f"sudo systemctl restart {config['service_name']}")
 
+@bot.command()
+async def restart(ctx):
+    if 'service_name' in config and config['service_name'] == '':
+        await ctx.send("No service specified to restart.")
+        return
+    await ctx.send("Restarting!")
+    os.system(f"sudo systemctl restart {config['service_name']}")
+
 
 @bot.event
 async def on_ready():
