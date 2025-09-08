@@ -1,4 +1,5 @@
 import json
+import os
 import re
 import shutil
 import urllib.request
@@ -196,6 +197,22 @@ async def status():
     """Sets bot status to the current number of humans and zombies"""
     h, z = get_vs_players()
     await bot.change_presence(activity=discord.CustomActivity(name=f'{h}🧍 vs {z}🧟'))
+
+@bot.command()
+async def update(ctx):
+    if ctx.author.id not in config['developers']:
+        return
+    res = os.popen("git pull").read()
+    if res.startswith('Already up to date.') or "CONFLICT (content):" in res:
+        await ctx.send('```\n' + res + '```')
+    else:
+        await ctx.send('```\n' + res + '```')
+        if config['service_name'] == '':
+            await ctx.send("No service specified to restart.")
+            return
+        await ctx.send("Restarting!")
+        os.system(f"sudo systemctl restart {config['service_name']}")
+
 
 @bot.event
 async def on_ready():
