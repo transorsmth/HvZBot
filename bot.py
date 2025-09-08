@@ -219,6 +219,9 @@ async def update(ctx):
 
 @bot.command()
 async def restart(ctx):
+    if ctx.author.id not in config['developers']:
+        ctx.send("You are not authorized to perform this action. ")
+        return
     if 'service_name' in config and config['service_name'] == '':
         await ctx.send("No service specified to restart.")
         return
