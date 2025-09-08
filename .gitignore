@@ -1,0 +1,4 @@
+last_recorded_tag.txt
+.venv/
+config.json
+uv.lock
