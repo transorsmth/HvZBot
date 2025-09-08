@@ -10,6 +10,7 @@ from discord.ext import commands, tasks
 
 with open('config.json') as f:
     config = json.loads(f.read())
+base_url = config['base_url']
 
 # load the last recorded tag, if it exists.
 try:
@@ -19,13 +20,12 @@ except FileNotFoundError:
     last_tag = None
 
 intents = discord.Intents.all()
-
 bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
-url_stub = 'https://hvzrit.club'
+
 
 def get_vs_players():
-    url = r'https://hvzrit.club/'
-    with urllib.request.urlopen(url) as f:
+    """Get the number of players on each side"""
+    with urllib.request.urlopen(base_url) as f:
         a = f.read().decode('utf-8')
     parsed_html = BeautifulSoup(a, features='lxml')
     humans = parsed_html.body.find('div', attrs={'id':'humancount-container'}).text
@@ -35,7 +35,8 @@ def get_vs_players():
     return h, z
 
 def get_tags() -> List:
-    url = r'https://hvzrit.club/tags/'
+    """Rip the tags from the table on the hvz website"""
+    url = f'{base_url}/tags/'
     tables = pd.read_html(url, extract_links="all")  # Returns list of all tables on page
     table_0 = tables[0]
     return table_0.values
@@ -48,7 +49,7 @@ def make_tag_embed(tag):
 
 def format_txt(t):
     """Formats tags into a consistent format"""
-    return f"[{t[1][0]}]({url_stub}{t[1][1]}) was tagged by [{t[0][0]}]({url_stub}{t[0][1]}) at {t[2][0]}"
+    return f"[{t[1][0]}]({base_url}{t[1][1]}) was tagged by [{t[0][0]}]({base_url}{t[0][1]}) at {t[2][0]}"
 
 def get_new_tags_only():
     """Gets new tags that haven't been sent, then saves the new last tag. """
