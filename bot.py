@@ -24,10 +24,45 @@ try:
         last_tag = f.read()
 except FileNotFoundError:
     last_tag = None
-
+try:
+    with open("last_recorded_av.txt", 'r') as f:
+        last_av = f.read()
+except FileNotFoundError:
+    last_av = None
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
 
+def get_avs():
+    """Gets the status tab of the index, then filters for AV uses, and only new ones. """
+    global last_av
+    with urllib.request.urlopen(base_url) as f:
+        a = f.read().decode('utf-8')
+
+    parsed_html = BeautifulSoup(a, features="lxml")
+    content = parsed_html.body.find('div', attrs={'class': 'col-md-6 recent-tags'}).text
+
+    c2 = content.replace("\n", '')
+    c2 = c2.removeprefix("Recent Events")
+    c2 = c2.replace("mins ago", 'mins ago\n')
+
+    c2 = c2.replace("hours ago", 'hours ago\n')
+
+    c2 = c2.replace("days ago", 'days ago\n')
+    while '  ' in c2:
+        c2 = c2.replace("  ", ' ')
+    c2 = c2.replace('\n ', "\n")
+    av_players = []
+    for line in c2.split('\n')[::-1]:
+        if "used an antivirus" in line:
+            name = line.split(". used an antivirus")[0]
+            if last_av == name:
+                break
+            av_players.append(name)
+            last_av = name
+            with open("last_recorded_av.txt", 'w') as f:
+                f.write(name)
+
+    return av_players
 
 def get_vs_players():
     """Get the number of players on each side"""
@@ -138,6 +173,22 @@ async def check_new_tags():
                 ch = await bot.fetch_channel(channel)
             await ch.send(embed=embed)
 
+@tasks.loop(seconds=config['check_interval'])
+async def check_new_avs():
+    """Checks for new avs, then sends them in the order they happened to all configured channels"""
+    print("Checking for new avs!")
+    avs = get_avs()
+    if len(avs)==0:
+        print("No new avs")
+        return
+    for t in avs[::-1]:
+        embed = discord.Embed(title=f"{t} used an antivirus!!!", color=discord.Color.red())
+        for channel in config['channels']:
+            ch = bot.get_channel(channel)
+            if ch is None:
+                ch = await bot.fetch_channel(channel)
+            await ch.send(embed=embed)
+
 @tasks.loop(seconds=60)
 async def status():
     """Sets bot status to the current number of humans and zombies"""
@@ -146,8 +197,10 @@ async def status():
 
 @bot.event
 async def on_ready():
+    """Just starts all periodic tasks"""
     check_new_tags.start()
     status.start()
+    check_new_avs.start()
 
 
 
