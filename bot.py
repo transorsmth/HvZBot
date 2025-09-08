@@ -201,10 +201,12 @@ async def status():
 
 @bot.command()
 async def update(ctx):
+    """Updates the bot from the git remote repository, and restarts it."""
     if ctx.author.id not in config['developers']:
         ctx.send("You are not authorized to perform this action. ")
         return
-    res = os.popen("git pull").read()
+    async with ctx.typing():
+        res = os.popen("git pull").read()
     if res.startswith('Already up to date.') or "CONFLICT (content):" in res:
         await ctx.send('```\n' + res + '```')
     else:
