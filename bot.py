@@ -86,6 +86,37 @@ def save_last():
     with open("last_recorded_tag.txt", 'w') as f:
         f.write(last_tag)
 
+
+@bot.command(name='leaderboard', aliases=['lb'])
+async def leaderboard(ctx):
+    """Display the leaderboard of zombies with the most tags."""
+    leaderboard_limit = 10
+    uri = f"""{base_url}/api/datatables/players?draw=2&columns%5B0%5D%5Bdata%5D=pic&columns%5B0%5D%5Bname%5D=picture&columns%5B0%5D%5Bsearchable%5D=true&columns%5B0%5D%5Borderable%5D=false&columns%5B0%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B0%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B1%5D%5Bdata%5D=name&columns%5B1%5D%5Bname%5D=name&columns%5B1%5D%5Bsearchable%5D=true&columns%5B1%5D%5Borderable%5D=true&columns%5B1%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B1%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B2%5D%5Bdata%5D=status&columns%5B2%5D%5Bname%5D=status&columns%5B2%5D%5Bsearchable%5D=true&columns%5B2%5D%5Borderable%5D=true&columns%5B2%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B2%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B3%5D%5Bdata%5D=tags&columns%5B3%5D%5Bname%5D=tags&columns%5B3%5D%5Bsearchable%5D=true&columns%5B3%5D%5Borderable%5D=true&columns%5B3%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B3%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B4%5D%5Bdata%5D=clan&columns%5B4%5D%5Bname%5D=clan&columns%5B4%5D%5Bsearchable%5D=true&columns%5B4%5D%5Borderable%5D=true&columns%5B4%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B4%5D%5Bsearch%5D%5Bregex%5D=false&order%5B0%5D%5Bcolumn%5D=1&order%5B0%5D%5Bdir%5D=asc&start=0&length=1000&search%5Bvalue%5D=&search%5Bregex%5D=false&_=1757339698811"""
+    with urllib.request.urlopen(uri) as f:
+        a = f.read().decode('utf-8')
+        j = json.loads(a)
+
+    players = j['data']
+    zombies = []
+    humans = []
+    for player in players:
+        if player["DT_RowClass"] == "dt_human":
+            humans.append(player)
+        elif player["DT_RowClass"] == "dt_zombie":
+            zombies.append(player)
+
+    sorted_zombies = sorted(zombies, key=lambda d: d['tags'], reverse=True)
+    if len(sorted_zombies) == 0:
+        await ctx.send("There are no zombies!")
+        return
+    leaderboard_message_text = """Leaderboard: \n"""
+    i = 1
+    for zombie in sorted_zombies[0:leaderboard_limit]:
+        player_name = BeautifulSoup(zombie["name"], features="lxml").text[:-1]
+        leaderboard_message_text += f"#{i} - [{player_name}]({base_url+zombie["DT_RowData"]["person_url"]}) - {zombie["tags"]}\n"
+        i+=1
+    await ctx.send(leaderboard_message_text)
+
 # @bot.command()
 # async def tags(ctx):
 #     """Manually triggered get new tags"""
@@ -117,5 +148,7 @@ async def status():
 async def on_ready():
     check_new_tags.start()
     status.start()
+
+
 
 bot.run(config['token'])
