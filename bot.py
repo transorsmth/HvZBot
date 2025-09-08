@@ -201,13 +201,14 @@ async def status():
 @bot.command()
 async def update(ctx):
     if ctx.author.id not in config['developers']:
+        ctx.send("You are not authorized to perform this action. ")
         return
     res = os.popen("git pull").read()
     if res.startswith('Already up to date.') or "CONFLICT (content):" in res:
         await ctx.send('```\n' + res + '```')
     else:
         await ctx.send('```\n' + res + '```')
-        if config['service_name'] == '':
+        if 'service_name' in config and config['service_name'] == '':
             await ctx.send("No service specified to restart.")
             return
         await ctx.send("Restarting!")
