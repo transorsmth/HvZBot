@@ -109,7 +109,7 @@ async def leaderboard(ctx):
     if len(sorted_zombies) == 0:
         await ctx.send("There are no zombies!")
         return
-    leaderboard_message_text = """Leaderboard: \n"""
+    leaderboard_message_text = """Zombie Leaderboard: \n"""
     i = 1
     for zombie in sorted_zombies[0:leaderboard_limit]:
         player_name = BeautifulSoup(zombie["name"], features="lxml").text[:-1]
