@@ -1,4 +1,4 @@
-# HvZBot
+# HvZBot (Unofficial)
 
 This is a discord bot designed to put the tag feed into a discord channel, as well as whatever other features I think of. 
 
