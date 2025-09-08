@@ -2,6 +2,7 @@ import json
 import re
 import shutil
 import urllib.request
+import urllib.parse
 from typing import List
 
 import discord
@@ -148,7 +149,8 @@ async def leaderboard(ctx):
     i = 1
     for zombie in sorted_zombies[0:leaderboard_limit]:
         player_name = BeautifulSoup(zombie["name"], features="lxml").text[:-1]
-        leaderboard_message_text += f"#{i} - [{player_name}]({base_url+zombie["DT_RowData"]["person_url"]}) - {zombie["tags"]}\n"
+        player_clan = BeautifulSoup(zombie["clan"], features="lxml").text[:-1] if zombie["clan"] is not None else ""
+        leaderboard_message_text += f"#{i} - [{player_name}]({base_url+zombie["DT_RowData"]["person_url"]}){f' ([{player_clan}]({base_url+urllib.parse.quote(zombie["DT_RowData"]["clan_url"])})) '  if player_clan != '' else ' '}- {zombie["tags"]}\n"
         i+=1
     await ctx.send(leaderboard_message_text)
 
