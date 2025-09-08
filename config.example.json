@@ -1,0 +1,7 @@
+{
+  "token": "YOUR_TOKEN_HERE",
+  "prefix": "&",
+  "channels": [],
+  "check_interval": 30,
+  "base_url": "https://hvzrit.club"
+}

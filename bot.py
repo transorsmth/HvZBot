@@ -1,5 +1,6 @@
 import json
 import re
+import shutil
 import urllib.request
 from typing import List
 
@@ -8,8 +9,13 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from discord.ext import commands, tasks
 
-with open('config.json') as f:
-    config = json.loads(f.read())
+try:
+    with open('config.json') as f:
+        config = json.loads(f.read())
+except FileNotFoundError:
+    shutil.copyfile('config.example.json', 'config.json')
+    exit("created config.json, please fill this in with your own values")
+
 base_url = config['base_url']
 
 # load the last recorded tag, if it exists.
