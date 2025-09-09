@@ -31,6 +31,7 @@ try:
         last_av = f.read()
 except FileNotFoundError:
     last_av = None
+
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix=config['prefix'], intents=intents)
 
@@ -129,6 +130,8 @@ def save_last():
 async def leaderboard(ctx):
     """Display the leaderboard of zombies with the most tags."""
     leaderboard_limit = 10
+
+    # yes this is just a massive url, but it's what the frontend sends to the backend for the actual site.
     uri = f"""{base_url}/api/datatables/players?draw=2&columns%5B0%5D%5Bdata%5D=pic&columns%5B0%5D%5Bname%5D=picture&columns%5B0%5D%5Bsearchable%5D=true&columns%5B0%5D%5Borderable%5D=false&columns%5B0%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B0%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B1%5D%5Bdata%5D=name&columns%5B1%5D%5Bname%5D=name&columns%5B1%5D%5Bsearchable%5D=true&columns%5B1%5D%5Borderable%5D=true&columns%5B1%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B1%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B2%5D%5Bdata%5D=status&columns%5B2%5D%5Bname%5D=status&columns%5B2%5D%5Bsearchable%5D=true&columns%5B2%5D%5Borderable%5D=true&columns%5B2%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B2%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B3%5D%5Bdata%5D=tags&columns%5B3%5D%5Bname%5D=tags&columns%5B3%5D%5Bsearchable%5D=true&columns%5B3%5D%5Borderable%5D=true&columns%5B3%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B3%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B4%5D%5Bdata%5D=clan&columns%5B4%5D%5Bname%5D=clan&columns%5B4%5D%5Bsearchable%5D=true&columns%5B4%5D%5Borderable%5D=true&columns%5B4%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B4%5D%5Bsearch%5D%5Bregex%5D=false&order%5B0%5D%5Bcolumn%5D=1&order%5B0%5D%5Bdir%5D=asc&start=0&length=1000&search%5Bvalue%5D=&search%5Bregex%5D=false&_=1757339698811"""
     async with ctx.typing():
         with urllib.request.urlopen(uri) as f:
@@ -194,7 +197,7 @@ async def check_new_avs():
                 ch = await bot.fetch_channel(channel)
             await ch.send(embed=embed)
 
-@tasks.loop(seconds=60)
+@tasks.loop(seconds=config['check_interval'])
 async def status():
     """Sets bot status to the current number of humans and zombies"""
     h, z = get_vs_players()
