@@ -222,12 +222,25 @@ async def update(ctx):
         os.system(f"sudo systemctl restart {config['service_name']}")
 
 @bot.command()
-async def restart(ctx):
+async def shutdown(ctx):
+    """Shutdown the bot"""
     if ctx.author.id not in config['developers']:
         ctx.send("You are not authorized to perform this action. ")
         return
     if 'service_name' in config and config['service_name'] == '':
-        await ctx.send("No service specified to restart.")
+        await ctx.send("No service specified to stop in config.")
+        return
+    await ctx.send("Restarting!")
+    os.system(f"sudo systemctl stop {config['service_name']}")
+
+@bot.command()
+async def restart(ctx):
+    """Restart the bot"""
+    if ctx.author.id not in config['developers']:
+        ctx.send("You are not authorized to perform this action. ")
+        return
+    if 'service_name' in config and config['service_name'] == '':
+        await ctx.send("No service specified to restart in config.")
         return
     await ctx.send("Restarting!")
     os.system(f"sudo systemctl restart {config['service_name']}")
