@@ -54,16 +54,17 @@ def get_avs():
         c2 = c2.replace("  ", ' ')
     c2 = c2.replace('\n ', "\n")
     av_players = []
-    for line in c2.split('\n')[::-1]:
+    for line in c2.split('\n'):
         if "used an antivirus" in line:
             name = line.split(". used an antivirus")[0]
             if last_av == name:
                 break
             av_players.append(name)
-            last_av = name
-            with open("last_recorded_av.txt", 'w') as f:
-                f.write(name)
-
+    if len(av_players) > 0:
+        name = av_players[0]
+        last_av = name
+        with open("last_recorded_av.txt", 'w') as f:
+            f.write(name)
     return av_players
 
 def get_vs_players():
