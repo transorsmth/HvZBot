@@ -253,6 +253,5 @@ async def on_ready():
     status.start()
     check_new_avs.start()
 
-
-
-bot.run(config['token'])
+if __name__ == "__main__":
+    bot.run(config['token'])
