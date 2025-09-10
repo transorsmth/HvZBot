@@ -46,11 +46,14 @@ def get_avs():
 
     c2 = content.replace("\n", '')
     c2 = c2.removeprefix("Recent Events")
+
     c2 = c2.replace("mins ago", 'mins ago\n')
 
     c2 = c2.replace("hours ago", 'hours ago\n')
 
     c2 = c2.replace("days ago", 'days ago\n')
+
+    c2 = c2.replace("just a moment ago", "just a moment ago\n")
     while '  ' in c2:
         c2 = c2.replace("  ", ' ')
     c2 = c2.replace('\n ', "\n")
